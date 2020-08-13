@@ -10,7 +10,7 @@ This will produce an interactive scatterplot of numeric column data from your Da
 
 ![Example dfbrowser screenshot](https://github.com/keatonb/dfbrowser/blob/master/screenshot.png)
 
-You can pick which columns to plot from the dropdown menus.  Click near points to select them.  The pandas Series associated with the selected row is passed to user defined function `funct` (either defined upon initialization or by setting the `dfbrowser.funct` parameter).  This function must be able to accept a pandas Series object as input (unfortunately using the "print" function doesn't direct the output to the cell, so see the demo.ipynb for how to display print output upon clicking).  You can also access the currently selected index and row as `dfbrowser.selectedindex` and `dfbrowser.selectedrow`.
+You can pick which columns to plot from the dropdown menus.  Click near points to select them.  The pandas Series associated with the selected row is passed to user defined function `funct` (either defined upon initialization or by setting the `dfbrowser.funct` parameter).  This function must be able to accept a pandas Series object as input. The standard output for print calls and exceptions will be directed to an output widget below the figure (this can be cleared with a call to `dfbrowser.clearoutput()`). You can also access the currently selected index and row as `dfbrowser.selectedindex` and `dfbrowser.selectedrow`.
 
 You must use the [ipympl](https://github.com/matplotlib/ipympl) >v0.5.4 backend with the notebook magic command `%matplotlib widget`, and enable these two Jupyter notebook extensions from the Terminal:
 ```
