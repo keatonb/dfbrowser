@@ -3,9 +3,10 @@
 """
 Created on Fri Aug  7 13:16:10 2020
 
-Quickly explore data stored in a pandas DataFrame. Choose which numeric columns
-to plot in a scatter plot, and click on any point to retreive the associated 
-row.
+Quickly explore data stored in a pandas DataFrame in a Jupyter Notebook. Choose 
+which numeric columns to plot in a scatter plot, and click on any point to 
+retreive the associated row. Must use the ipympl backend with the notebook 
+magic `%matplotlib widget`.
 
 There are three ways to pass the selected row data to a different function:
      - pass on init with the funct argument
@@ -50,9 +51,9 @@ class dfbrowser(object):
         df : pandas dataframe
             Contains data to plot in columns.
         columns : list of strings
-            Column names to plot (must be numeric)
+            Column names to plot (must be numeric). Default is all numeric df columns.
         figsize : tuple
-            figure width, height in inches. The default is (5,5).
+            Figure width, height in inches. The default is (5,5).
         funct : function, optional
             Function to send DataFrame rows to upon selection. The default is None.
         show : bool, optional
@@ -60,7 +61,6 @@ class dfbrowser(object):
         **kwargs : kwargs
             Get passed to scatterplot function call
         """
-        
         self.df = df
         plt.ioff()#don't display
         self.fig, self.ax = plt.subplots(1,1,figsize=figsize,constrained_layout=True)
@@ -126,7 +126,8 @@ class dfbrowser(object):
         )
         self._yreverse.observe(self._flipaxis)
         
-        
+        #Make a widget to capture function output:
+        self.output = widgets.Output()
         
     def _changevar(self,event):
         if event["name"] == 'value':
@@ -172,11 +173,9 @@ class dfbrowser(object):
         #update marker for selected point
         self._updatemarker()
         
-        self.fig.canvas.draw()
-        
-        
     #Click event action
     def _onclick(self,event):
+        
         if event.xdata is not None:
             #Compute distace from clicks to points
             #Adjusting for different x and y scales
@@ -197,13 +196,22 @@ class dfbrowser(object):
             self.selectedrow = self.df.iloc[self.selectedindex]
             self._updatemarker()
             
-            #Pass to function if available
+            #Pass to function
+            self._passtofunct()
+                    
+    def _passtofunct(self):
+        with self.output:
             if self.funct is not None:
                 try:
                     self.funct(self.selectedrow)
                 except:
-                    raise Exception("passing DataFrame row to user function failed.")
-            
+                    raise Exception("Passing DataFrame row to user function failed.")
+    
+    def clearoutput(self):
+        """Clear output widget text
+        """
+        self.output.clear_output()
+    
     def _updatemarker(self):
         #https://matplotlib.org/2.0.0/examples/event_handling/data_browser.html
         if self.selectedindex is None:
@@ -220,11 +228,14 @@ class dfbrowser(object):
     #This stuff distinguishes clicks from drags
     #https://stackoverflow.com/a/48452190
     def _onpress(self,event):
+        print('press')
         self._press=True
     def _onmove(self,event):
+        print('move')
         if self._press:
             self._move=True
     def _onrelease(self,event):
+        print('release')
         if self._press and not self._move:
             self._onclick(event)
         self._press=False; self._move=False
@@ -233,7 +244,7 @@ class dfbrowser(object):
     def show(self):
         show = widgets.VBox([widgets.HBox([self._xvar,self._xreverse]),
                              widgets.HBox([self._yvar,self._yreverse]),
-                             self.fig.canvas])
+                             self.fig.canvas,self.output])
         return show
         
         
